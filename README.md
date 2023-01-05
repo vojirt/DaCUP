@@ -1,7 +1,7 @@
 # Image-Consistent Detection of Road Anomalies As Unpredictable Patches 
 Pytorch implementation of our WACV 2023 paper with the pre-trained model used to generate the results presented in the publication.
 
-**[Paper](https://openaccess.thecvf.com/content/WACV2023/html/Vojir_Image-Consistent_Detection_of_Road_Anomalies_As_Unpredictable_Patches_WACV_2023_paper.html)
+**[Paper](https://openaccess.thecvf.com/content/WACV2023/papers/Vojir_Image-Consistent_Detection_of_Road_Anomalies_As_Unpredictable_Patches_WACV_2023_paper.pdf)
 | [Supplementary
 Video](https://drive.google.com/file/d/1uDXmdjTTItU1lNfKLF7uniLmznktRcQc/view?usp=share_link)** 
 
