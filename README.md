@@ -19,7 +19,7 @@ If you use this work please cite:
 
 ## Overview
 
-The method consists of two main components:
+The method consists of three main components:
 1. A semantic segmentation network. Currently, a DeepLab v3 architecture is
    used (code adopted from
    [jfzhang95](https://github.com/jfzhang95/pytorch-deeplab-xception)
