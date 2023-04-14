@@ -26,7 +26,10 @@ The method consists of two main components:
    distributed under MIT licence). The backbone is ResNet-101 pre-trained on
    ImageNet. It was trained on CityScapes dataset and the network weights are
    fixed.
-2. An anomaly estimation network. It is a standalone module that uses the
+2. An inpainting network adopted from
+   [csqiangwen](https://github.com/csqiangwen/DeepFillv2_Pytorch) and merged to
+   single file module.
+3. An anomaly estimation network. It is a standalone module that uses the
    features extracted from the ResNet-101 backbone and the output of the
    segmentation network before softmax normalization.
 
