@@ -269,7 +269,6 @@ def get_triplets_torch_stochastic_partiall_EPS(emb, labels, ignore_label=255, on
             dist_negative = (emb[ap[:, 0], None, :] - emb[None, negative_indices, :]).pow(2).sum(-1)
             neg_idx = torch.argmin(dist_negative, dim=1)
 
-        #neg_idx = torch.randint(0, negative_indices.size(0), (ap.size(0),)) 
         temp_triplets = torch.cat([ap, negative_indices[neg_idx][:, None]], dim=1)
         if triplets is None:
             triplets = temp_triplets

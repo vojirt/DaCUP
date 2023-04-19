@@ -48,16 +48,11 @@ class CouplingEmbSegmReconGlobalOnlyDecoderFullRes(nn.Module):
             # segm emb mean
             if torch.sum(segm_road_mask[b, ...]) > 0:
                 mean_road_emb[b, 0, :] = emb[b, ...].flatten(start_dim=1).transpose(0, 1)[segm_road_mask[b, ...], :].mean(dim=0)
-            #else:
-            #    mean_road_emb[b, 0, 0] = 5 
             # global recon mean
             if torch.sum(global_recon_mask[b, ...]) > 0:
                 mean_road_emb[b, 1, :] = emb[b, ...].flatten(start_dim=1).transpose(0, 1)[global_recon_mask[b, ...], :].mean(dim=0)
-            #else:
-            #    mean_road_emb[b, 1, 0] = 5 
 
         # [B, 2, Hf, Wf]
-        # NOTE: add some cap on the max value?
         emb_dist = ((emb[:, None, :, :, :]-mean_road_emb[:, :, :, None, None]).pow(2).sum(dim=2) + 1e-9).sqrt()
         
         # [B, 2, Hs, Ws]
@@ -101,10 +96,7 @@ class CouplingEmbSegmReconGlobalOnlyDecoderFullResInpaintWide(nn.Module):
             parameter.requires_grad = False
 
         self.perceptual_loss = PerceptualPixelLossTrainableMerge()
-        #self.perceptual_loss = PerceptualPixelLossTrainableChannels()
         
-        #self.global_recon_loss_thr = 0.1 #0.2
-        #self.global_recon_loss_thr = 0.1*torch.ones(1, requires_grad=True, device="cuda", dtype=torch.float) 
         self.global_recon_loss_thr = torch.nn.Parameter(torch.ones(1, device="cuda", dtype=torch.float) * 0.1, requires_grad=True)
 
     def forward(self, input, emb, segmentation_logits, recon_loss):
@@ -133,16 +125,11 @@ class CouplingEmbSegmReconGlobalOnlyDecoderFullResInpaintWide(nn.Module):
             # segm emb mean
             if torch.sum(segm_road_mask[b, ...]) > 0:
                 mean_road_emb[b, 0, :] = emb[b, ...].flatten(start_dim=1).transpose(0, 1)[segm_road_mask[b, ...], :].mean(dim=0)
-            #else:
-            #    mean_road_emb[b, 0, 0] = 5 
             # global recon mean
             if torch.sum(global_recon_mask[b, ...]) > 0:
                 mean_road_emb[b, 1, :] = emb[b, ...].flatten(start_dim=1).transpose(0, 1)[global_recon_mask[b, ...], :].mean(dim=0)
-            #else:
-            #    mean_road_emb[b, 1, 0] = 5 
 
         # [B, 2, Hf, Wf]
-        # NOTE: add some cap on the max value?
         emb_dist = ((emb[:, None, :, :, :]-mean_road_emb[:, :, :, None, None]).pow(2).sum(dim=2) + 1e-9).sqrt()
         
         # [B, 2, Hs, Ws]

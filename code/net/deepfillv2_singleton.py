@@ -197,7 +197,6 @@ class PerceptualPixelLossTrainableMerge(PerceptualPixelLoss):
         l2 = torch.nn.functional.interpolate(l2[:, None, ...], mode='bilinear', size=(self.img_sz, self.img_sz), align_corners=False)
         l3 = torch.nn.functional.interpolate(l3[:, None, ...], mode='bilinear', size=(self.img_sz, self.img_sz), align_corners=False)
 
-        #w = self.pyramid_weights / torch.sum(self.pyramid_weights)
         w = self.pyramid_weights
         return self.sigmoid(w[0]*l1 + w[1]*l2 + w[2]*l3)
 

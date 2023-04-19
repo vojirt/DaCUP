@@ -8,7 +8,6 @@ class ReconstructionDecoderFromEmbeddings(nn.Module):
     def __init__(self, cfg, **kwargs):
         super(ReconstructionDecoderFromEmbeddings, self).__init__()
         self.layers_dim = [16, 32, 64, 128]
-        #self.embedding_part_dim = int(0.75*cfg.MODEL.LOCAL_RECONSTRUCTION.EMBEDDING_DIM)
         self.embedding_part_dim = cfg.MODEL.LOCAL_RECONSTRUCTION.EMBEDDING_DIM
         self.skip_conn_flag = cfg.MODEL.RECONSTRUCTION.SKIP_CONN
 
@@ -55,14 +54,12 @@ class ReconstructionDecoderFromEmbeddings(nn.Module):
             self.std_tensor = self.std_tensor.cuda(img.get_device())
 
         recons = torch.clamp(self.final_layer(d_l3)*self.std_tensor+self.mean_tensor, 0, 1)
-        #recons = torch.clamp(self.final_layer(d_l3), 0, 1)
         recons_loss = self.recon_loss(recons, torch.clamp(img*self.std_tensor+self.mean_tensor, 0, 1))[:, None, ...]
         
         return [recons, recons_loss]
 
 
 def conv_block(in_channels, out_channels, kernel_size=3, stride=1, padding=1):
-    # NOTE: GeLU instead of ReLU?
     return nn.Sequential(
                nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding),
                nn.BatchNorm2d(out_channels),
