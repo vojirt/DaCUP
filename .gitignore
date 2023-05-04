@@ -1,1 +1,4 @@
 checkpoints/
+__pycache__/
+*.pyc
+training/
