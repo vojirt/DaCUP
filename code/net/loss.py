@@ -173,11 +173,15 @@ class GlobalOnlyDecL2TripletMarginLossXentCoupeling(object):
                 if self.print_flags[0]:
                     self.print_flags[0] = False
                     print("__LOSS__: Using warm up dynamic weights w_xent, w_tri, w_local_recon, w_global_recon = 0.0, 1.2, 0.0, 0.0")
+                if torch.isnan(xent_loss).any():
+                    xent_loss = 0
             elif epoch < 10:
                 w_xent, w_tri, w_local_recon, w_global_recon = 0.0, 0.4, 0.4, 0.4
                 if self.print_flags[1]:
                     self.print_flags[1] = False
                     print("__LOSS__: Using warm up dynamic weights w_xent, w_tri, w_local_recon, w_global_recon = 0.0, 0.4, 0.4, 0.4")
+                if torch.isnan(xent_loss).any():
+                    xent_loss = 0
             else:
                 if self.print_flags[2]:
                     self.print_flags[2] = False
