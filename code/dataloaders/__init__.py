@@ -1,4 +1,4 @@
-from dataloaders.datasets import cityscapes, cityscapes_2class, lostandfound, bdd100k_2class, city_bdd_2class, city_bdd_all_p1
+from dataloaders.datasets import cityscapes, cityscapes_2class, lostandfound, bdd100k_2class, city_bdd_2class
 from torch.utils.data import DataLoader
 from mypath import Path
 import numpy
