@@ -116,7 +116,7 @@ There are three pre-trained models:
    the parameters provided in the `parameters.yaml` configuration file. It used
    CityScapes+BDD100k datasets for training and LaF training data for
    validation. Download from
-   [gdrive_dacup_model](https://drive.google.com/file/d/1z-Hxfd8rqX1fSljZowVkeLC9w6w5xv3i/view?usp=share_link).
+   [gdrive_dacup_model](https://drive.google.com/file/d/1z-Hxfd8rqX1fSljZowVkeLC9w6w5xv3i/view?usp=share_link) (or model without the inpainting part [gdrive_dacup_w/o_inpaint_model](https://drive.google.com/file/d/1q_ZrQ9DfKtL-GcRL7UCtP-wsT5ZXmdyO/view?usp=sharing)).
 
 ## Performance 
 
@@ -130,7 +130,7 @@ datasets (RO, RO21).
 |                               | LaF          | LaF-train    | FS           | RA           | RO            | OT            |
 | ----------------------------- | ------------ | ------------ | ------------ | ------------ | ------------  | ------------- |
 | JSR-Net (ICCV 2021)           | 79.4 / 4.3   | 87.8 / 1.7   | 79.3 / 4.7   | 93.4 / 8.9   | 79.8 / 0.9    | 28.1 / 28.7   |
-| DaCUP w/o impaint (WACV 2023) | 85.1 / 2.1   | ---          | 88.8 / 1.7   | 94.3 /   6.8 | 90.3 /   0.17 | ---           |
+| DaCUP w/o inpaint (WACV 2023) | 85.1 / 2.1   | ---          | 88.8 / 1.7   | 94.3 /   6.8 | 90.3 /   0.17 | ---           |
 | DaCUP (WACV 2023)             | 84.5 / 2.6   | ---          | 89.7 / 1.4   | 96.2 /   5.5 | 94.3 /  0.08  | 81.5 / 1.1    |
 
 
