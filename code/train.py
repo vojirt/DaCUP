@@ -12,10 +12,8 @@ from config import cfg
 from datetime import datetime
 import importlib
 
-from mypath import Path
 from dataloaders import make_data_loader
 from net.sync_batchnorm.replicate import patch_replication_callback
-from utils.calculate_weights import calculate_weigths_labels
 from utils.lr_scheduler import LR_Scheduler
 from utils.saver import Saver
 from utils.summaries import TensorboardSummary
