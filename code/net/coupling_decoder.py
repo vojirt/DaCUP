@@ -150,10 +150,10 @@ class CouplingEmbSegmReconGlobalOnlyDecoderFullResInpaintWide(nn.Module):
         input_range = torch.clamp(input*self.std_tensor+self.mean_tensor, 0, 1)
         if img_sz_area > 1280*720:
             new_size_factor = np.sqrt(1280*720 / img_sz_area)
-            new_sz = np.array(new_size_factor * np.array(input.size()[2:]), dtype=np.int)
+            new_sz = np.array(new_size_factor * np.array(input.size()[2:]), dtype=int)
             # Must be divisible by 8 for the otherwise the GAN crashes (strides and resizing issues, prob) 
             new_sz = np.round((new_sz/2**3))*(2**3)         
-            new_sz = tuple(new_sz.astype(np.int).tolist())
+            new_sz = tuple(new_sz.astype(int).tolist())
             input_res = F.interpolate(input_range, mode='bilinear', size=new_sz, align_corners=False)
             inpaint_mask_res = (F.interpolate(inpaint_mask, mode='bilinear', size=new_sz, align_corners=False) > 0).float()
         else:
