@@ -19,10 +19,10 @@ class LocalPatchEmbedding(nn.Module):
         self.embedding_net = nn.Sequential(
                     nn.Linear(self.latent_dim_per_scale*5, 2*self.latent_dim_per_scale),   # 5 scales in ASPP each with latent_dim_per_scale channels
                     nn.ReLU(),
-                    nn.Dropout(p=self.fc_dropout_p,inplace=True),
+                    nn.Dropout(p=self.fc_dropout_p),
                     nn.Linear(2*self.latent_dim_per_scale, self.latent_dim_per_scale),
                     nn.ReLU(),
-                    nn.Dropout(p=self.fc_dropout_p,inplace=True),
+                    nn.Dropout(p=self.fc_dropout_p),
                     nn.Linear(self.latent_dim_per_scale, self.embedding_dim),
                     nn.ReLU()
                 )
