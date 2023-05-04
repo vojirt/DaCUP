@@ -19,7 +19,7 @@ _C.MODEL.NET = "DeepLabEmbeddingGlobalOnlySegmFullResInpaint_wide"      # disabl
 
 _C.MODEL.RECONSTRUCTION = CN()
 _C.MODEL.RECONSTRUCTION.LATENT_DIM = 4      # number of channels of latent space
-_C.MODEL.RECONSTRUCTION.SEGM_MODEL = "/mnt/datagrid/personal/vojirtom/sod/mcsegm/20210302_234038_642070/checkpoints/checkpoint-best.pth"  #resnet 66.1
+_C.MODEL.RECONSTRUCTION.SEGM_MODEL = "<ABSOLUTE PATH TO>/checkpoint-segmentation.pth"  #resnet 66.1
 _C.MODEL.RECONSTRUCTION.SEGM_MODEL_NCLASS = 19  # 19 for cityscapes
 _C.MODEL.RECONSTRUCTION.SKIP_CONN = True 
 _C.MODEL.RECONSTRUCTION.SKIP_CONN_DIM = 32 
@@ -32,7 +32,7 @@ _C.MODEL.LOCAL_RECONSTRUCTION.LATENT_DIM_PER_SCALE = 128    # 5*LATENT_DIM_PER_S
 _C.MODEL.LOCAL_RECONSTRUCTION.EMBEDDING_DIM = 16            # size of embedding for each local patch
 _C.MODEL.LOCAL_RECONSTRUCTION.SKIP_CONN = True 
 
-_C.MODEL.INPAINT_WEIGHTS_FILE = "/mnt/datagrid/personal/vojirtom/sod/deepfillv2_WGAN_G_epoch40_batchsize4.pth"
+_C.MODEL.INPAINT_WEIGHTS_FILE = "<ABSOLUTE PATH TO>/deepfillv2_WGAN_G_epoch40_batchsize4.pth"
 
 _C.LOSS = CN()
 _C.LOSS.IGNORE_LABEL = 255
