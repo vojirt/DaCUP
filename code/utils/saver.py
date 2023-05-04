@@ -11,7 +11,7 @@ class Saver(object):
         self.experiment_code_dir = os.path.join(self.experiment_dir, "code")
         os.makedirs(self.experiment_checkpoints_dir, exist_ok=True)
         os.makedirs(self.experiment_code_dir, exist_ok=True)
-        os.system("rsync -avm --include='*/' --include='*.py' --exclude='*' ./ " + self.experiment_code_dir)
+        os.system("rsync -avm --exclude='training/'  --include='*/' --include='*.py' --exclude='*' ./ " + self.experiment_code_dir)
 
     def save_checkpoint(self, state, is_best, filename="checkpoint-latest.pth"):
         if is_best:
