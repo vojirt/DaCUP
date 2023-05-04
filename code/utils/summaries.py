@@ -11,7 +11,7 @@ import copy
 from torchvision.utils import make_grid
 from tensorboardX import SummaryWriter
 from dataloaders.utils import decode_seg_map_sequence
-from net.loss import reshape_embeddings_and_labels
+from net.loss import reshape_embeddings_and_labels_opt
 
 class TensorboardSummary(object):
     def __init__(self, cfg, directory):
@@ -99,7 +99,7 @@ class TensorboardSummary(object):
     def visualize_emb(self, writer, dataset, image, target, output, global_step, epoch, epoch_id, validation=False):
         filename = os.path.join(self.dump_dir_val if validation else self.dump_dir_tr, "e{:04d}_i{:08d}.jpg".format(epoch, epoch_id))
         # plot 2D projection using PCA
-        emb, labels = reshape_embeddings_and_labels(output["embeddings"].detach(), target)
+        emb, labels = reshape_embeddings_and_labels_opt(output["embeddings"].detach(), target)
         _, _, V = torch.pca_lowrank(emb, center=True)
         proj = torch.matmul(emb, V[:, :2]).cpu().numpy() 
         labels = labels.cpu().numpy()
