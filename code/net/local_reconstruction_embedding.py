@@ -1,5 +1,6 @@
 from torch import nn
 from net.aspp import ASPP
+from net.sync_batchnorm.batchnorm import SynchronizedBatchNorm2d
 
 
 class LocalPatchEmbedding(nn.Module):
