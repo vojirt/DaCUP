@@ -80,16 +80,16 @@ class SegmEvaluator(Evaluator):
 class AnomalyEvaluator(Evaluator):
     def __init__(self, cfg, **kwargs):
         self.ignore_label = cfg.LOSS.IGNORE_LABEL
-        self.quantization = 1000
-        self.anomaly_range = [0, 1]
+        self.quantization = 2048
+        self.anomaly_range = [-1e-2, 1+1e-2]
         self.cmat = np.zeros(shape=[self.quantization, 2, 2])  
     
     def create_roi(self, gt_label):
-        roi = (gt_label != self.ignore_label).astype(np.bool)
-        # TODO limit roi to regions around road, so the metric is focused on anomalies on the road
+        roi = (gt_label != self.ignore_label).astype(bool)
         return roi
 
     def compute_cmat(self, gt_label, prob):
+        """ assumes that anomaly label is 0 and road label is 1 in gt_label """
         roi = self.create_roi(gt_label)
         prob = prob[roi]
         area = prob.__len__()
@@ -150,14 +150,15 @@ class AnomalyEvaluator(Evaluator):
         tp_rates = tp / (tp+fn) # = recall
         fp_rates = fp / (fp+tn)
 
-        fp[(tp+fp) == 0] = 1e-9
         precision = tp / (tp+fp) 
+        precision[(tp+fp) == 0] = 1
 
-        area_under_TPRFPR = np.trapz(tp_rates, fp_rates)
-        AP = np.trapz(precision, tp_rates)
+        x = np.linspace(0, 1, num=int(1e5))
+        y = interp1d(tp_rates, precision, kind="linear")(x)
+        AP = np.trapz(y, x)
 
         f = interp1d(tp_rates, fp_rates, kind="linear")
-        FPRat95 = f(0.95)
+        FPRat95 = f(0.95)   # get interpolated value of FPR at exactly 95% of TPR
 
         writer = kwargs.get("writer", None)
         if writer is not None: 
@@ -170,5 +171,3 @@ class AnomalyEvaluator(Evaluator):
             return [AP, FPRat95]
         else:
             return AP 
-            #return AP*(1-FPRat95) 
-
