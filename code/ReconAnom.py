@@ -220,12 +220,11 @@ def eval_on_LaF():
     from scipy.interpolate import interp1d
     import tqdm
 
-    params = {"exp_dir": "/mnt/datagrid/personal/vojirtom/code_temp/dacup_test/"}
+    params = {"exp_dir": "<PATH TO REPOSITORY ROOT DIR or DIR PRODUCED BY TRAINING>"}
 
     evaluator = ReconAnom(**params)
 
     path_to_laf_dataset_root = "<PATH TO LaF ROOT DIR>"
-    path_to_laf_dataset_root = "/mnt/datasets/lost_and_found/"
     images_base = os.path.join(path_to_laf_dataset_root , 'leftImg8bit', "test")
     annotations_base = os.path.join(path_to_laf_dataset_root , 'gtCoarse', "test")
     images = [os.path.join(looproot, filename)
