@@ -1,14 +1,9 @@
 import os
 import sys
 import torch
-import torch.nn.functional as F
 import importlib
 import numpy as np
-import skimage
 
-#from config import get_cfg_defaults
-sys.path.append("<PATH TO REPO ROOT DIR>/code/config/")
-from defaults import get_cfg_defaults
 
 class MethodEvaluator():
     def __init__(self, **kwargs):
@@ -28,61 +23,64 @@ class ReconAnom(MethodEvaluator):
         self.print_crops_stats_once_2 = True
         self.print_slic_stats_once = True
 
-        cfg_local = get_cfg_defaults() 
+        #from config import get_cfg_defaults
+        config_module = importlib.util.spec_from_file_location("get_cfg_defaults", os.path.join(self.code_dir, "config", "defaults.py")).loader.load_module()
+        cfg_fnc = getattr(config_module, "get_cfg_defaults")
+        self.cfg = cfg_fnc() 
 
         if os.path.isfile(os.path.join(self.exp_dir, "parameters.yaml")):
             with open(os.path.join(self.exp_dir, "parameters.yaml"), 'r') as f:
-                cc = cfg_local._load_cfg_from_yaml_str(f)
-            cfg_local.merge_from_file(os.path.join(self.exp_dir, "parameters.yaml"))
-            cfg_local.EXPERIMENT.NAME = cc.EXPERIMENT.NAME
+                cc = self.cfg._load_cfg_from_yaml_str(f)
+            self.cfg.merge_from_file(os.path.join(self.exp_dir, "parameters.yaml"))
+            self.cfg.EXPERIMENT.NAME = cc.EXPERIMENT.NAME
         else:
             assert False, "Experiment directory does not contain parameters.yaml: {}".format(self.exp_dir)
         if os.path.isfile(os.path.join(self.code_dir, "checkpoints", "checkpoint-best.pth")):
-            cfg_local.EXPERIMENT.RESUME_CHECKPOINT = os.path.join(self.code_dir, "checkpoints", "checkpoint-best.pth")
-        elif (cfg_local.EXPERIMENT.RESUME_CHECKPOINT is None 
-                or not os.path.isfile(cfg_local.EXPERIMENT.RESUME_CHECKPOINT)):
-            assert False, "Experiment dir does not contain best checkpoint, or no checkpoint specified or specified checkpoint does not exist: {}".format(cfg_local.EXPERIMENT.RESUME_CHECKPOINT)
+            self.cfg.EXPERIMENT.RESUME_CHECKPOINT = os.path.join(self.code_dir, "checkpoints", "checkpoint-best.pth")
+        elif (self.cfg.EXPERIMENT.RESUME_CHECKPOINT is None 
+                or not os.path.isfile(self.cfg.EXPERIMENT.RESUME_CHECKPOINT)):
+            assert False, "Experiment dir does not contain best checkpoint, or no checkpoint specified or specified checkpoint does not exist: {}".format(self.cfg.EXPERIMENT.RESUME_CHECKPOINT)
 
         if not torch.cuda.is_available(): 
             print ("GPU is disabled")
-            cfg_local.SYSTEM.USE_GPU = False
+            self.cfg.SYSTEM.USE_GPU = False
 
-        if cfg_local.MODEL.SYNC_BN is None:
-            if cfg_local.SYSTEM.USE_GPU and len(cfg_local.SYSTEM.GPU_IDS) > 1:
-                cfg_local.MODEL.SYNC_BN = True
+        if self.cfg.MODEL.SYNC_BN is None:
+            if self.cfg.SYSTEM.USE_GPU and len(self.cfg.SYSTEM.GPU_IDS) > 1:
+                self.cfg.MODEL.SYNC_BN = True
             else:
-                cfg_local.MODEL.SYNC_BN = False
+                self.cfg.MODEL.SYNC_BN = False
 
-        if cfg_local.INPUT.BATCH_SIZE_TRAIN is None:
-            cfg_local.INPUT.BATCH_SIZE_TRAIN = 4 * len(cfg_local.SYSTEM.GPU_IDS)
+        if self.cfg.INPUT.BATCH_SIZE_TRAIN is None:
+            self.cfg.INPUT.BATCH_SIZE_TRAIN = 4 * len(self.cfg.SYSTEM.GPU_IDS)
 
-        if cfg_local.INPUT.BATCH_SIZE_TEST is None:
-            cfg_local.INPUT.BATCH_SIZE_TEST = cfg_local.INPUT.BATCH_SIZE_TRAIN
+        if self.cfg.INPUT.BATCH_SIZE_TEST is None:
+            self.cfg.INPUT.BATCH_SIZE_TEST = self.cfg.INPUT.BATCH_SIZE_TRAIN
 
-        cfg_local.freeze()
-        self.device = torch.device("cuda:0" if cfg_local.SYSTEM.USE_GPU else "cpu")
+        self.cfg.freeze()
+        self.device = torch.device("cuda:0" if self.cfg.SYSTEM.USE_GPU else "cpu")
 
-        self.mean_tensor = torch.FloatTensor(cfg_local.INPUT.NORM_MEAN)[None, :, None, None].to(self.device)
-        self.std_tensor = torch.FloatTensor(cfg_local.INPUT.NORM_STD)[None, :, None, None].to(self.device)
+        self.mean_tensor = torch.FloatTensor(self.cfg.INPUT.NORM_MEAN)[None, :, None, None].to(self.device)
+        self.std_tensor = torch.FloatTensor(self.cfg.INPUT.NORM_STD)[None, :, None, None].to(self.device)
 
         # Define network
         sys.path.insert(0, self.code_dir)
-        kwargs = {'cfg': cfg_local}
+        kwargs = {'cfg': self.cfg}
         spec = importlib.util.spec_from_file_location("models", os.path.join(self.exp_dir, "code", "net", "models.py"))
         model_module = spec.loader.load_module()
         print (self.exp_dir, model_module)
-        self.model = getattr(model_module, cfg_local.MODEL.NET)(**kwargs)
+        self.model = getattr(model_module, self.cfg.MODEL.NET)(**kwargs)
         sys.path = sys.path[1:]
 
-        if cfg_local.EXPERIMENT.RESUME_CHECKPOINT is not None:
-            if not os.path.isfile(cfg_local.EXPERIMENT.RESUME_CHECKPOINT):
-                raise RuntimeError("=> no checkpoint found at '{}'" .format(cfg_local.EXPERIMENT.RESUME_CHECKPOINT))
-            checkpoint = torch.load(cfg_local.EXPERIMENT.RESUME_CHECKPOINT, map_location="cpu")
-            if cfg_local.SYSTEM.USE_GPU and torch.cuda.device_count() > 1:
+        if self.cfg.EXPERIMENT.RESUME_CHECKPOINT is not None:
+            if not os.path.isfile(self.cfg.EXPERIMENT.RESUME_CHECKPOINT):
+                raise RuntimeError("=> no checkpoint found at '{}'" .format(self.cfg.EXPERIMENT.RESUME_CHECKPOINT))
+            checkpoint = torch.load(self.cfg.EXPERIMENT.RESUME_CHECKPOINT, map_location="cpu")
+            if self.cfg.SYSTEM.USE_GPU and torch.cuda.device_count() > 1:
                 self.model.module.load_state_dict(checkpoint['state_dict'])
             else:
                 self.model.load_state_dict(checkpoint['state_dict'])
-            print("=> loaded checkpoint '{}' (epoch {})".format(cfg_local.EXPERIMENT.RESUME_CHECKPOINT, checkpoint['epoch']))
+            print("=> loaded checkpoint '{}' (epoch {})".format(self.cfg.EXPERIMENT.RESUME_CHECKPOINT, checkpoint['epoch']))
             del checkpoint
         else:
             raise RuntimeError("=> model checkpoint has to be provided for testing!")
@@ -91,12 +89,6 @@ class ReconAnom(MethodEvaluator):
         self.model.to(self.device)
         self.model.eval()
         
-        if hasattr(self.model.coupeling_net, "global_recon_loss_thr"):
-            print (f"global_recon_loss_thr: {self.model.coupeling_net.global_recon_loss_thr}")
-        if hasattr(self.model.coupeling_net, "perceptual_loss"):
-            if hasattr(self.model.coupeling_net.perceptual_loss, "pyramid_weights"):
-                print (f"perceptual weights: {self.model.coupeling_net.perceptual_loss.pyramid_weights}")
-
         to_del = []
         for k, v in sys.modules.items():
             if k[:3] == "net":
@@ -175,8 +167,9 @@ def decode_segmap(label_mask, dataset):
     rgb[:, :, 2] = b / 255.0
     return rgb
 
+# ==============================================================================
 
-def main():
+def plot_results_for_single_image():
     from PIL import Image
     import cv2
     from matplotlib import pyplot as plt
@@ -221,6 +214,108 @@ def main():
     print ("perceptual_loss: ", perceptual_loss.shape)
     cv2.imwrite(os.path.join(out_dir, "perceptual_loss.png"), perceptual_loss[:,:,::-1])
 
+def eval_on_LaF():
+    from PIL import Image
+    import torchvision
+    from scipy.interpolate import interp1d
+    import tqdm
+
+    params = {"exp_dir": "/mnt/datagrid/personal/vojirtom/code_temp/dacup_test/"}
+
+    evaluator = ReconAnom(**params)
+
+    path_to_laf_dataset_root = "<PATH TO LaF ROOT DIR>"
+    path_to_laf_dataset_root = "/mnt/datasets/lost_and_found/"
+    images_base = os.path.join(path_to_laf_dataset_root , 'leftImg8bit', "test")
+    annotations_base = os.path.join(path_to_laf_dataset_root , 'gtCoarse', "test")
+    images = [os.path.join(looproot, filename)
+                for looproot, _, filenames in os.walk(images_base)
+                for filename in filenames if filename.endswith(".png")]
+
+    quantization = 2048
+    thr_range = [-1e-2, 1+1e-2]
+
+    def compute_cmat(gt_label, prob):
+        """ assumes that anomaly label is 0 and road label is 1 in gt_label """
+        roi = (gt_label != 255).astype(bool)
+        prob = prob[roi]
+        area = prob.__len__()
+        gt_label = gt_label[roi]
+        gt_mask_road = (gt_label == 1)
+        gt_mask_obj = ~gt_mask_road
+        gt_area_true = np.count_nonzero(gt_mask_obj)
+        gt_area_false = area - gt_area_true
+        prob_at_true = prob[gt_mask_obj]
+        prob_at_false = prob[~gt_mask_obj]
+        tp, _ = np.histogram(prob_at_true, quantization, range=thr_range)
+        tp = np.cumsum(tp[::-1])
+        fn = gt_area_true - tp
+        fp, _ = np.histogram(prob_at_false, quantization, range=thr_range)
+        fp = np.cumsum(fp[::-1])
+        tn = gt_area_false - fp
+        cmat = np.array([
+            [tp, fp],
+            [fn, tn],
+            ]).transpose(2, 0, 1)
+        if area > 0:
+            cmat = cmat.astype(np.float64) / area
+        else:
+            cmat[:] = 0
+        if np.any((cmat>1) | (cmat<0)):
+            assert False, "Error in computing tp,fp,fn,tn. Some values larger than 1 or less than 0 {}".format(cmat)
+
+        return cmat, area > 0
+
+    cmat = np.zeros(shape=[quantization, 2, 2])  
+    for i in tqdm.tqdm(range(0, len(images))):
+        img_path = images[i].rstrip()
+        lbl_path = os.path.join(annotations_base, img_path.split(os.sep)[-2], os.path.basename(img_path)[:-15] + 'gtCoarse_labelTrainIds.png')
+        img = Image.open(img_path).convert('RGB')
+        _tmp = np.array(Image.open(lbl_path), dtype=np.uint8)
+        target = np.zeros_like(_tmp, dtype=np.uint8) # 0 = anomaly label (from label 2 used in LaF)
+        target[_tmp == 255] = 255   # ignore label
+        target[_tmp == 1] = 1       # road label 
+        # set non-hazard objects to ignore label per Lost-and-Found paper description, 
+        # for details see https://arxiv.org/pdf/1609.04653v1.pdf section IV. A)
+        # NOTE: when disabled, the performance slightly drops (I assume it is because it is hard to distinguish flat anomalies from e.g. drawings on the road) 
+        target[_tmp == 0] = 255     
+
+        # [batch=1, 3, H, W]
+        img = torchvision.transforms.ToTensor()(img).cuda()[None, ...]
+
+        # [batch, H, W]
+        pred = evaluator.evaluate(img).cpu().numpy()[0, ...]
+        assert target.shape == pred.shape
+
+        cmat_b, valid_frame = compute_cmat(target, pred)
+        if valid_frame:
+            cmat += cmat_b
+    
+    tp = cmat[:, 0, 0]
+    fp = cmat[:, 0, 1]
+    fn = cmat[:, 1, 0]
+    tn = cmat[:, 1, 1]
+
+    tp_rates = tp / (tp+fn) # = recall
+    fp_rates = fp / (fp+tn)
+        
+    precision = tp / (tp+fp) 
+    precision[(tp+fp) == 0] = 1
+
+    x = np.linspace(0, 1, num=int(1e5))
+    y = interp1d(fp_rates, tp_rates, kind="linear")(x)
+    area_under_TPRFPR = np.trapz(y, x)
+    y = interp1d(tp_rates, precision, kind="linear")(x)
+    AP = np.trapz(y, x)
+    f = interp1d(tp_rates, fp_rates, kind="linear")
+    FPRat95 = f(0.95).item()   # get interpolated value of FPR at exactly 95% of TPR
+
+    print(f"AP:{AP:0.4f}, FPR@95:{FPRat95:0.4f}, AUROC:{area_under_TPRFPR:0.4f}")
+
 
 if __name__ == "__main__":
-    main()
+     # to plot intermediate results for a single image
+     # plot_results_for_single_image()
+
+     # to replicate results on LaF-test dataset from github and paper
+     eval_on_LaF()
