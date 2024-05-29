@@ -92,11 +92,10 @@ To add new dataset:
 
 ## Testing
 
-For the testing, the `./ReconAnon.py` script is used (see the file for
+For the testing, the `code/ReconAnon.py` script is used (see the file for
 a minimal example). The `exp_dir` parameter needs to be set to point to a root
-directory where the `code` directory and `parameters.yaml` are located.  The
-inserted path on line 6 in `./ReconAnon.py` need to be set to point to the
-`code/config` directory.  The `evaluate` function expect a tensor with size [1, C, H,
+directory where the `code` directory and `parameters.yaml` are located. 
+The `evaluate` function expect a tensor with size [1, C, H,
 W] (i.e. batch size of 1) where the image is normalized into [0,1] range. 
 
 ## Models
