@@ -17,6 +17,9 @@ If you use this work please cite:
 }
 ```
 
+## Update 🔥🔥
+- **2024.05.29 💥 New model available! It utilize DINOv2 backbone for feature extraction and semantic segmentation. See Model Section.** 
+
 ## Overview
 
 The method consists of three main components:
@@ -104,19 +107,30 @@ There are three pre-trained models:
    in the configuration file `MODEL.RECONSTRUCTION.SEGM_MODEL` variable.
    Download from
    [gdrive_segmentation_model](https://drive.google.com/file/d/1ahx2EaYGQQpK5uXSBRagt_okFnvSex_I/view?usp=share_link).
-1. The inpainting model (fixed, does not need to be modified).
+2. The inpainting model (fixed, does not need to be modified).
    The path to the checkpoint `deepfillv2_WGAN_G_epoch40_batchsize4.pth` needs to be set
    in the configuration file `MODEL.INPAINT_WEIGHTS_FILE` variable.
    Download from
    [gdrive_inpaint_model](https://drive.google.com/file/d/1zb49M2dhRK_7RMPYhQA5l--WbKXFQVuw/view?usp=share_link).
-2. The model of the anomaly detection network (either train or use pre-trained)
-   and put into `<GITREPO/code/checkpoints/>checkpoint-best.pth` or set path in
-   the `parameters.yaml` file MODEL.RESUME_CHECKPOINT to absolute path to the
-   `checkpoint_best.pth`. This model used in the publication was trained using
+3. Put the model of the anomaly detection network (either trained or use pre-trained)
+   into `<GITREPO/code/checkpoints/>checkpoint-best.pth` or set path in
+   the `parameters.yaml` file `MODEL.RESUME_CHECKPOINT` to **absolute path** to the
+   checkpoint file. The model used in the publication was trained using
    the parameters provided in the `parameters.yaml` configuration file. It used
    CityScapes+BDD100k datasets for training and LaF training data for
    validation. Download from
    [gdrive_dacup_model](https://drive.google.com/file/d/1z-Hxfd8rqX1fSljZowVkeLC9w6w5xv3i/view?usp=share_link) (or model without the inpainting part [gdrive_dacup_w/o_inpaint_model](https://drive.google.com/file/d/1q_ZrQ9DfKtL-GcRL7UCtP-wsT5ZXmdyO/view?usp=sharing)).
+
+
+**New anomaly detection model with DINOv2 backbone** is available
+   [here](https://drive.google.com/file/d/1wq96czmP38P-8y8qvwOpzqZiU8eA6oZw/view?usp=sharing)
+   with semantic segmentation part
+   [here](https://drive.google.com/file/d/153ah9SqvwEeb3NK-O2Z2-wAxq9edxORt/view?usp=sharing)
+   and the corresponding configuration is provided in `parameters_dinov2.yaml`.
+   For setup follow the instruction from 3). **NOTE** that `ReconAnom.py` file
+   for evaluation expects parameters in file `parameters.yaml` so if you want
+   to use the DINOv2 model either modify `ReconAnom.py` file (around line
+   31) or rename the `parameters_dinov2.yaml` to `parameters.yaml`.
 
 ## Performance 
 
@@ -132,6 +146,8 @@ datasets (RO, RO21).
 | JSR-Net (ICCV 2021)           | 79.4 / 4.3   | 87.8 / 1.7   | 79.3 / 4.7   | 93.4 / 8.9   | 79.8 / 0.9    | 28.1 / 28.7   |
 | DaCUP w/o inpaint (WACV 2023) | 85.1 / 2.1   | ---          | 88.8 / 1.7   | 94.3 /   6.8 | 90.3 /   0.17 | ---           |
 | DaCUP (WACV 2023)             | 84.5 / 2.6   | ---          | 89.7 / 1.4   | 96.2 /   5.5 | 94.3 /  0.08  | 81.5 / 1.1    |
+| DINOv2 DaCUP                  | ---          | ---          | 93.3 / 0.6   | 98.6 / 2.4   | 90.7 /  0.4   | 83.6 / 1.4    |
+
 
 
 Datasets used for evaluation:

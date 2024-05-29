@@ -8,7 +8,7 @@ _C.SYSTEM.USE_GPU = True
 _C.SYSTEM.GPU_IDS = [0]                   # which gpus to use for training - list of int, e.g. [0, 1]
 _C.SYSTEM.RNG_SEED = 42
 
-_C.MODEL = CN()
+_C.MODEL = CN(new_allowed=True)
 _C.MODEL.BACKBONE = "resnet"                # choices: ['resnet', 'xception', 'drn', 'mobilenet']
 _C.MODEL.OUT_STRIDE = 16                    # deeplab output stride
 _C.MODEL.SYNC_BN = None                     # whether to use sync bn (for multi-gpu), None == Auto detect

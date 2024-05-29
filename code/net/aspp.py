@@ -39,6 +39,8 @@ class ASPP(nn.Module):
                 inplanes = 512
             elif backbone == 'mobilenet':
                 inplanes = 320
+            if backbone == 'dino':
+                inplanes = 1024
             else:
                 inplanes = 2048
         else:

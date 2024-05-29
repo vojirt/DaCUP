@@ -17,9 +17,12 @@ class ReconstructionDecoderFromEmbeddings(nn.Module):
         self.up2 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         self.up_size = lambda x, sz: F.interpolate(x, size=sz, mode='bilinear', align_corners=True)
 
+        in_channels = 2048
+        if cfg.MODEL.BACKBONE == "dino":
+            in_channels = 1024 
 
         if self.skip_conn_flag:
-            self.skip_conn_layer = conv_block(2048, self.embedding_part_dim)
+            self.skip_conn_layer = conv_block(in_channels, self.embedding_part_dim)
             self.dec_layer0 = conv_block(2*self.embedding_part_dim, self.layers_dim[3])
         else:
             self.dec_layer0 = conv_block(self.embedding_part_dim, self.layers_dim[3])
